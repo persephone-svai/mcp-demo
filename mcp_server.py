@@ -3,6 +3,8 @@ import psycopg2
 import psycopg2.extras
 from dotenv import load_dotenv
 import os
+import logging
+logging.basicConfig(level=logging.INFO)
 
 load_dotenv()
 DATABASE_NAME = os.getenv("DATABASE_NAME")
@@ -11,7 +13,7 @@ DATABASE_USER = os.getenv("DATABASE_USER")
 DATABASE_PASSWORD = os.getenv("DATABASE_PASSWORD")
 DATABASE_PORT = os.getenv("DATABASE_PORT")
 
-print("connecting to the database")
+logging.info("connecting to the database")
 connection = psycopg2.connect(
     host=DATABASE_HOST,
     user=DATABASE_USER,
@@ -20,10 +22,10 @@ connection = psycopg2.connect(
     dbname=DATABASE_NAME,
     cursor_factory=psycopg2.extras.DictCursor
 )
-print("connected")
+logging.info("connected")
 cur = connection.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
-print("Created cursor")
-print("Database setup complete")
+logging.info("Created cursor")
+logging.info("Database setup complete")
 
 mcp = FastMCP("MCP Demo Server")
 
