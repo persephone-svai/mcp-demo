@@ -62,6 +62,11 @@ def get_tenant(tenant_id: int) -> dict | None:
     return rows[0] if rows else None
 
 @mcp.tool
+def get_tenant_family(parent_id: int) -> list[dict]:
+    """Get all tenants belonging to the same family by parent tenant ID."""
+    return query("SELECT * FROM smartreit.tenant WHERE parent_tenant_id = %s", (parent_id,))
+
+@mcp.tool
 def get_all_tenants(limit: int = 50) -> list[dict]:
     """Get all tenants."""
     return query("SELECT * FROM smartreit.tenant ORDER BY tenant_id LIMIT %s", (min(limit, 200),))
