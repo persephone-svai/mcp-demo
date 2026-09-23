@@ -1,19 +1,23 @@
-"""Space tools."""
-
+"""Space tools (units/suites)."""
 from fastmcp import FastMCP
-from db import query, build_where
+from db import query, build_where, cap_limit, distinct_values
 
 space = FastMCP("space")
 
-SPACE_COLS = ("space_id, property_id, building_id, floor_id, space_code, space_type, "
-              "rentable_sf, usable_sf, bedrooms, bathrooms, current_status")
+TABLE = "smartreit.space"
+SPACE_COLUMNS = (
+    "space_id", "property_id", "building_id", "floor_id", "space_code", "space_type",
+    "rentable_sf", "usable_sf", "bedrooms", "bathrooms", "current_status",
+)
+SPACE_COLS = ", ".join(SPACE_COLUMNS)
+
 
 @space.tool
 def get_space(space_id: int) -> dict | None:
     """Get a single space by space_id. Returns null if not found."""
-    rows = query(f"SELECT {SPACE_COLS} FROM smartreit.space WHERE space_id = %s",
-                 (space_id,))
+    rows = query(f"SELECT {SPACE_COLS} FROM {TABLE} WHERE space_id = %s", (space_id,))
     return rows[0] if rows else None
+
 
 @space.tool
 def find_spaces(
@@ -41,9 +45,10 @@ def find_spaces(
          ("bedrooms >= %s", min_bedrooms),
          ("bathrooms >= %s", min_bathrooms)],
     )
-    sql = (f"SELECT {SPACE_COLS} FROM smartreit.space{where} "
+    sql = (f"SELECT {SPACE_COLS} FROM {TABLE}{where} "
            "ORDER BY property_id, building_id, floor_id, space_code LIMIT %s")
-    return query(sql, params + [min(limit, 200)])
+    return query(sql, params + [cap_limit(limit)])
+
 
 @space.tool
 def space_summary(
@@ -57,22 +62,16 @@ def space_summary(
     allowed = {"current_status", "space_type", "property_id", "building_id", "floor_id"}
     if group_by not in allowed:
         raise ValueError(f"group_by must be one of {sorted(allowed)}")
-    where, params = build_where({"property_id": property_id,
-                                 "building_id": building_id})
+    where, params = build_where({"property_id": property_id, "building_id": building_id})
     sql = (f"SELECT {group_by}, COUNT(*) AS spaces, "
            "SUM(rentable_sf) AS total_rentable_sf, SUM(usable_sf) AS total_usable_sf, "
            "ROUND(100.0 * SUM(rentable_sf) / NULLIF(SUM(SUM(rentable_sf)) OVER (), 0), 1) "
            "AS pct_of_rentable_sf "
-           f"FROM smartreit.space{where} "
-           f"GROUP BY {group_by} ORDER BY {group_by}")
+           f"FROM {TABLE}{where} GROUP BY {group_by} ORDER BY {group_by}")
     return query(sql, params)
+
 
 @space.tool
 def space_filter_values() -> dict:
-    """List distinct space_type and current_status values in use."""
-    return {
-        col: [r[col] for r in query(
-            f"SELECT DISTINCT {col} FROM smartreit.space "
-            f"WHERE {col} IS NOT NULL ORDER BY 1")]
-        for col in ("space_type", "current_status")
-    }
+    """List distinct space_type and current_status values in use, for find_spaces."""
+    return distinct_values(TABLE, ("space_type", "current_status"))

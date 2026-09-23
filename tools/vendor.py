@@ -1,48 +1,58 @@
+"""Vendor tools (contractors and service providers)."""
 from datetime import date
 from fastmcp import FastMCP
-from db import query, build_where
-from datetime import date
+from db import query, build_where, cap_limit, distinct_values
+
 vendor = FastMCP("vendor")
 
-VENDOR_COLS = ("vendor_id", "party_id", "vendor_type", 
-               "tax_id", "insurance_expiration", "status")
+TABLE = "smartreit.vendor"
+VENDOR_COLUMNS = (
+    "vendor_id", "party_id", "vendor_type", "tax_id", "insurance_expiration", "status",
+)
+VENDOR_COLS = ", ".join(VENDOR_COLUMNS)
+
 
 @vendor.tool
 def get_vendor(vendor_id: int) -> dict | None:
-    """Get a single vendor by vendor_id. Returns null if not found."""
-    rows = query(f"SELECT {VENDOR_COLS} FROM smartreit.vendor WHERE vendor_id = %s",
-                 (vendor_id,))
+    """Get a single vendor by vendor_id. Returns null if not found.
+    Vendor names live on the party record (see party_id / find_parties)."""
+    rows = query(f"SELECT {VENDOR_COLS} FROM {TABLE} WHERE vendor_id = %s", (vendor_id,))
     return rows[0] if rows else None
+
 
 @vendor.tool
 def find_vendors(
-    vendor_id: int | None = None,
     party_id: int | None = None,
     vendor_type: str | None = None,
-    tax_id: str | None = None,
-    insurance_expiration: date | None = None,
     status: str | None = None,
+    insurance_expires_before: date | None = None,
+    insurance_expires_after: date | None = None,
     limit: int = 50,
 ) -> list[dict]:
-    """Search vendors. All filters are optional and combined with AND.
-    Omit a filter to ignore it; call with no filters to list vendors."""
+    """Search vendors. All filters optional, combined with AND.
+    Use insurance_expires_before to find vendors whose insurance has lapsed or
+    is about to. Use vendor_filter_values to see valid vendor_type and status values."""
     where, params = build_where(
-        {"vendor_id": vendor_id, "party_id": party_id, "vendor_type": vendor_type,
-         "tax_id": tax_id, "insurance_expiration": insurance_expiration, "status": status},
+        {"party_id": party_id, "vendor_type": vendor_type, "status": status},
+        [("insurance_expiration < %s", insurance_expires_before),
+         ("insurance_expiration > %s", insurance_expires_after)],
     )
-    sql = (f"SELECT {VENDOR_COLS} FROM smartreit.vendor{where} "
-           "ORDER BY vendor_id LIMIT %s")
-    return query(sql, params + [min(limit, 200)])
+    sql = f"SELECT {VENDOR_COLS} FROM {TABLE}{where} ORDER BY vendor_id LIMIT %s"
+    return query(sql, params + [cap_limit(limit)])
+
 
 @vendor.tool
-def vendor_exists(vendor_id: int) -> bool:
-    """Check if a vendor exists by vendor_id."""
-    rows = query(f"SELECT 1 FROM smartreit.vendor WHERE vendor_id = %s", (vendor_id,))
-    return bool(rows)
+def vendor_summary(group_by: str = "status") -> list[dict]:
+    """Count vendors grouped by status or vendor_type."""
+    allowed = {"status", "vendor_type"}
+    if group_by not in allowed:
+        raise ValueError(f"group_by must be one of {sorted(allowed)}")
+    sql = (f"SELECT {group_by}, COUNT(*) AS vendors FROM {TABLE} "
+           f"GROUP BY {group_by} ORDER BY vendors DESC")
+    return query(sql)
+
 
 @vendor.tool
-def count_active_vendors() -> int:
-    """Count the total number of active vendors."""
-    rows = query("SELECT COUNT(*) AS count FROM smartreit.vendor WHERE status = 'active'")
-    return rows[0]["count"] if rows else 0
-
+def vendor_filter_values() -> dict:
+    """List distinct vendor_type and status values in use, for find_vendors."""
+    return distinct_values(TABLE, ("vendor_type", "status"))

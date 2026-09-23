@@ -1,14 +1,20 @@
 """Property tools (buildings/assets in the portfolio)."""
 from datetime import date
 from fastmcp import FastMCP
-from db import query, build_where
+from db import query, build_where, cap_limit, contains, distinct_values
 
+# Named property_tools because `property` is a Python built-in.
 property_tools = FastMCP("property")
 
-PROPERTY_COLS = ("property_id, property_code, property_name, property_type, subtype, "
-                 "ownership_entity_id, acquisition_date, disposition_date, "
-                 "acquisition_price, current_status, year_built, year_renovated, "
-                 "total_building_sf, total_land_acres, address_id, latitude, longitude")
+TABLE = "smartreit.property"
+PROPERTY_COLUMNS = (
+    "property_id", "property_code", "property_name", "property_type", "subtype",
+    "ownership_entity_id", "acquisition_date", "disposition_date",
+    "acquisition_price", "current_status", "year_built", "year_renovated",
+    "total_building_sf", "total_land_acres", "address_id", "latitude", "longitude",
+)
+PROPERTY_COLS = ", ".join(PROPERTY_COLUMNS)
+
 
 @property_tools.tool
 def get_property(property_id: int | None = None,
@@ -19,9 +25,9 @@ def get_property(property_id: int | None = None,
         raise ValueError("Give property_id or property_code")
     where, params = build_where({"property_id": property_id,
                                  "property_code": property_code})
-    rows = query(f"SELECT {PROPERTY_COLS} FROM smartreit.property{where} LIMIT 1",
-                 params)
+    rows = query(f"SELECT {PROPERTY_COLS} FROM {TABLE}{where} LIMIT 1", params)
     return rows[0] if rows else None
+
 
 @property_tools.tool
 def find_properties(
@@ -47,8 +53,7 @@ def find_properties(
         {"property_type": property_type, "subtype": subtype,
          "current_status": current_status,
          "ownership_entity_id": ownership_entity_id},
-        [("concat_ws(' ', property_name, property_code) ILIKE %s",
-          f"%{name_contains}%" if name_contains else None),
+        [("concat_ws(' ', property_name, property_code) ILIKE %s", contains(name_contains)),
          ("acquisition_date >= %s", acquired_from),
          ("acquisition_date <= %s", acquired_to),
          ("total_building_sf >= %s", min_building_sf),
@@ -56,9 +61,9 @@ def find_properties(
          ("year_built >= %s", built_after),
          ("year_built <= %s", built_before)],
     )
-    sql = (f"SELECT {PROPERTY_COLS} FROM smartreit.property{where} "
-           "ORDER BY property_name LIMIT %s")
-    return query(sql, params + [min(limit, 200)])
+    sql = f"SELECT {PROPERTY_COLS} FROM {TABLE}{where} ORDER BY property_name LIMIT %s"
+    return query(sql, params + [cap_limit(limit)])
+
 
 @property_tools.tool
 def find_properties_near(latitude: float, longitude: float,
@@ -73,14 +78,15 @@ def find_properties_near(latitude: float, longitude: float,
                        * cos(radians(longitude) - radians(%s))
                        + sin(radians(%s)) * sin(radians(latitude)))))::numeric, 2)
                    AS distance_km
-            FROM smartreit.property
+            FROM {TABLE}
             WHERE latitude IS NOT NULL AND longitude IS NOT NULL
         ) p
         WHERE distance_km <= %s
         ORDER BY distance_km
         LIMIT %s
     """
-    return query(sql, [latitude, longitude, latitude, radius_km, min(limit, 200)])
+    return query(sql, [latitude, longitude, latitude, radius_km, cap_limit(limit)])
+
 
 @property_tools.tool
 def property_summary(group_by: str = "property_type",
@@ -96,16 +102,12 @@ def property_summary(group_by: str = "property_type",
            "SUM(total_building_sf) AS total_building_sf, "
            "SUM(total_land_acres) AS total_land_acres, "
            "SUM(acquisition_price) AS total_acquisition_price "
-           f"FROM smartreit.property{where} "
-           f"GROUP BY {group_by} ORDER BY properties DESC")
+           f"FROM {TABLE}{where} GROUP BY {group_by} ORDER BY properties DESC")
     return query(sql, params)
+
 
 @property_tools.tool
 def property_filter_values() -> dict:
-    """List distinct property_type, subtype and current_status values in use."""
-    return {
-        col: [r[col] for r in query(
-            f"SELECT DISTINCT {col} FROM smartreit.property "
-            f"WHERE {col} IS NOT NULL ORDER BY 1")]
-        for col in ("property_type", "subtype", "current_status")
-    }
+    """List distinct property_type, subtype and current_status values in use,
+    for find_properties."""
+    return distinct_values(TABLE, ("property_type", "subtype", "current_status"))
