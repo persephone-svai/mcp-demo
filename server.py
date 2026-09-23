@@ -50,11 +50,27 @@ def query(sql, params=()):
 
 logging.info(f"host={DATABASE_HOST!r} user={DATABASE_USER!r} port={DATABASE_PORT!r} pw_set={bool(DATABASE_PASSWORD)}")
 logging.info("connected")
-cur = connection.cursor(cursor_factory = psycopg2.extras.RealDictCursor)
 logging.info("Created cursor")
 logging.info("Database setup complete")
 
 mcp = FastMCP("MCP Demo Server")
+
+
+
+@mcp.tool
+def get_tenant(tenant_id: int):
+    return query("SELECT * FROM tenants WHERE id = %s", (tenant_id,))
+
+@mcp.tool
+def get_all_tenants():
+    return query("SELECT * FROM tenants")
+
+@mcp.tool
+def get_available_space():
+    return query("SELECT * FROM space WHERE available = TRUE")
+
+
+
 
 if __name__ == "__main__":
     mcp.run()
