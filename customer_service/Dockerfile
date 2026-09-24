@@ -10,4 +10,4 @@ COPY . .
 
 EXPOSE 9292
 
-CMD ["python","mcp_server.py"]
+CMD ["python","cs_mcp.py"]
