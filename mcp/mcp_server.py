@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 
 from fastmcp import FastMCP
 from tools.address import address
@@ -29,7 +30,10 @@ from tools.work_order import work_order
 
 logging.basicConfig(level=logging.INFO)
 
-mcp = FastMCP("smartreit")
+# Sent to the connecting agent as the server's instructions.
+INSTRUCTIONS = (Path(__file__).parent / "AGENT_INSTRUCTIONS.md").read_text(encoding="utf-8")
+
+mcp = FastMCP("smartreit", instructions=INSTRUCTIONS)
 
 for server in (
     address, asset, building, department, employee, floor,
