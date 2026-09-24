@@ -3,7 +3,7 @@ from pathlib import Path
 
 from fastmcp import FastMCP
 
-from tools import employee, department, customer_service
+from tools import customer_service
 
 logging.basicConfig(level=logging.INFO)
 
@@ -13,11 +13,8 @@ mcp = FastMCP("smartreit", instructions ="You are a customer service assistant f
 
 
 
-for server in (
-    employee, department
-): 
-    mcp.mount(server)
+mcp.mount(customer_service.customer_service)
 
 
 if __name__ == "__main__":
-    mcp.run()
+    mcp.run(transport="http", host="0.0.0.0", port=9292)
