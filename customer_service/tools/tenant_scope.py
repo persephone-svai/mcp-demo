@@ -3,18 +3,21 @@ from fastmcp.server.dependencies import get_http_headers
 from db import query
 
 def caller_scope() -> dict:
-    """Return the caller's own account information based on their email."""
+    """The caller's email plus the IDs of their tenant accounts and leases."""
     headers = get_http_headers()
     email = headers.get("x-tenant-email")
     if not email:
         raise ValueError("Missing tenant email in headers")
-    result = query("SELECT * FROM smartreit.tenant WHERE email = %s", (email,))
-    if not result:
+    tenants = [r["tenant_id"] for r in query(
+        "SELECT tenant_id FROM smartreit.tenant WHERE email = %s", (email,))]
+    if not tenants:
         raise ValueError("Tenant not found")
-    return result[0]
+    leases = [r["lease_id"] for r in query(
+        "SELECT lease_id FROM smartreit.lease WHERE tenant_id = ANY(%s)", (tenants,))]
+    return {"email": email, "tenants": tenants, "leases": leases}
 
-def my_leases(tenant_id: int) -> list[dict]:
-    """Return all leases for the given tenant."""
-    leases = query("SELECT * FROM smartreit.lease WHERE tenant_id = %s", (tenant_id,))
-    lease_id = [lease["lease_id"] for lease in leases]
-    return lease_id
+def my_leases(lease_id: int, scope: dict) -> list[int]:
+    """[lease_id] if it belongs to the caller; raises PermissionError otherwise."""
+    if lease_id not in scope["leases"]:
+        raise PermissionError(f"Lease {lease_id} is not on your account")
+    return [lease_id]
