@@ -2,31 +2,31 @@ import logging
 from pathlib import Path
 
 from fastmcp import FastMCP
-from tools.address import address
-from tools.asset import asset
-from tools.building import building
-from tools.department import department
-from tools.employee import employee
-from tools.floor import floor
-from tools.lease import lease
-from tools.lease_party import lease_party
-from tools.lease_rent_schedule import lease_rent_schedule
-from tools.lease_space import lease_space
-from tools.management_agreement import management_agreement
-from tools.organization import organization
-from tools.ownership_entity import ownership_entity
-from tools.party import party
-from tools.party_individual import party_individual
-from tools.party_role import party_role
-from tools.property import property_tools
-from tools.property_operating_snapshot import property_operating_snapshot
-from tools.security_deposit import security_deposit
-from tools.space import space
-from tools.tenant import tenant
-from tools.tenant_billing import tenant_billing
-from tools.tenant_improvement import tenant_improvement
-from tools.vendor import vendor
-from tools.work_order import work_order
+from mcp.tools.address import address
+from mcp.tools.asset import asset
+from mcp.tools.building import building
+from mcp.tools.department import department
+from mcp.tools.employee import employee
+from mcp.tools.floor import floor
+from mcp.tools.lease import lease
+from mcp.tools.lease_party import lease_party
+from mcp.tools.lease_rent_schedule import lease_rent_schedule
+from mcp.tools.lease_space import lease_space
+from mcp.tools.management_agreement import management_agreement
+from mcp.tools.organization import organization
+from mcp.tools.ownership_entity import ownership_entity
+from mcp.tools.party import party
+from mcp.tools.party_individual import party_individual
+from mcp.tools.party_role import party_role
+from mcp.tools.property import property_tools
+from mcp.tools.property_operating_snapshot import property_operating_snapshot
+from mcp.tools.security_deposit import security_deposit
+from mcp.tools.space import space
+from mcp.tools.tenant import tenant
+from mcp.tools.tenant_billing import tenant_billing
+from mcp.tools.tenant_improvement import tenant_improvement
+from mcp.tools.vendor import vendor
+from mcp.tools.work_order import work_order
 
 logging.basicConfig(level=logging.INFO)
 

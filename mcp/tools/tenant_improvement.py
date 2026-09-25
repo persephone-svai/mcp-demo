@@ -1,7 +1,7 @@
 """Tenant improvement (TI) tools: build-out budgets and spend per lease/space."""
 from datetime import date
 from fastmcp import FastMCP
-from db import query, build_where, cap_limit
+from customer_service.db import query, build_where, cap_limit
 
 tenant_improvement = FastMCP("tenant_improvement")
 

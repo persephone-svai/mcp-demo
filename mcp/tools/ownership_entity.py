@@ -1,5 +1,5 @@
 from fastmcp import FastMCP
-from db import query, build_where, cap_limit, contains
+from customer_service.db import query, build_where, cap_limit, contains
 from datetime import date
 
 ownership_entity = FastMCP("ownership_entity")

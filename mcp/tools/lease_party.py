@@ -1,6 +1,6 @@
 """Lease party tools (who is on each lease: tenant, guarantor, broker, etc.)."""
 from fastmcp import FastMCP
-from db import query, build_where, cap_limit, distinct_values
+from customer_service.db import query, build_where, cap_limit, distinct_values
 
 lease_party = FastMCP("lease_party")
 

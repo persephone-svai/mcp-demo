@@ -1,7 +1,7 @@
 """Lease rent schedule tools (scheduled rent and charges, with escalations)."""
 from datetime import date
 from fastmcp import FastMCP
-from db import query, build_where, cap_limit, distinct_values
+from customer_service.db import query, build_where, cap_limit, distinct_values
 
 lease_rent_schedule = FastMCP("lease_rent_schedule")
 

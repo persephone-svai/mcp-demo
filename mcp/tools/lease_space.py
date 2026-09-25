@@ -1,6 +1,6 @@
 """Lease space tools (which spaces each lease covers, and how much SF)."""
 from fastmcp import FastMCP
-from db import query, build_where, cap_limit
+from customer_service.db import query, build_where, cap_limit
 
 lease_space = FastMCP("lease_space")
 

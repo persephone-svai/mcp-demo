@@ -1,7 +1,7 @@
 """Security deposit tools (deposits held against leases)."""
 from datetime import date
 from fastmcp import FastMCP
-from db import query, build_where, cap_limit, distinct_values
+from customer_service.db import query, build_where, cap_limit, distinct_values
 
 security_deposit = FastMCP("security_deposit")
 

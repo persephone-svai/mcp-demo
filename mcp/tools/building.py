@@ -1,6 +1,6 @@
 """Building tools (buildings within properties)."""
 from fastmcp import FastMCP
-from db import query, build_where, cap_limit, contains, distinct_values
+from customer_service.db import query, build_where, cap_limit, contains, distinct_values
 
 building = FastMCP("building")
 

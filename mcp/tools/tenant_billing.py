@@ -1,7 +1,7 @@
 """Tenant billing tools."""
 from datetime import date
 from fastmcp import FastMCP
-from db import query, build_where, cap_limit, distinct_values
+from customer_service.db import query, build_where, cap_limit, distinct_values
 
 tenant_billing = FastMCP("tenant_billing")
 

@@ -1,6 +1,6 @@
 """Space tools (units/suites)."""
 from fastmcp import FastMCP
-from db import query, build_where, cap_limit, distinct_values
+from customer_service.db import query, build_where, cap_limit, distinct_values
 
 space = FastMCP("space")
 

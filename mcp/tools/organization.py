@@ -1,7 +1,7 @@
 """Organization tools (details for parties that are companies)."""
 from datetime import date
 from fastmcp import FastMCP
-from db import query, build_where, cap_limit, contains, distinct_values
+from customer_service.db import query, build_where, cap_limit, contains, distinct_values
 
 organization = FastMCP("organization")
 

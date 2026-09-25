@@ -1,7 +1,7 @@
 """Property operating snapshot tools (occupancy, rent, NOI, expenses over time)."""
 from datetime import date
 from fastmcp import FastMCP
-from db import query, build_where, cap_limit
+from customer_service.db import query, build_where, cap_limit
 
 property_operating_snapshot = FastMCP("property_operating_snapshot")
 

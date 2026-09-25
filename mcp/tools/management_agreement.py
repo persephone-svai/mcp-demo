@@ -1,7 +1,7 @@
 """Management agreement tools (who manages each property, on what terms)."""
 from datetime import date
 from fastmcp import FastMCP
-from db import query, build_where, cap_limit, distinct_values
+from customer_service.db import query, build_where, cap_limit, distinct_values
 
 management_agreement = FastMCP("management_agreement")
 

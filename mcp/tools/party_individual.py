@@ -1,6 +1,6 @@
 """Party individual tools (personal details for parties that are people)."""
 from fastmcp import FastMCP
-from db import query, build_where, cap_limit, contains
+from customer_service.db import query, build_where, cap_limit, contains
 
 party_individual = FastMCP("party_individual")
 

@@ -1,6 +1,6 @@
 """Party role tools (details about the roles that parties can have)."""
 from fastmcp import FastMCP
-from db import query, build_where, cap_limit, contains
+from customer_service.db import query, build_where, cap_limit, contains
 
 party_role = FastMCP("party_role")
 TABLE = "smartreit.party_role"

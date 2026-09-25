@@ -1,7 +1,7 @@
 """Property tools (buildings/assets in the portfolio)."""
 from datetime import date
 from fastmcp import FastMCP
-from db import query, build_where, cap_limit, contains, distinct_values
+from customer_service.db import query, build_where, cap_limit, contains, distinct_values
 
 # Named property_tools because `property` is a Python built-in.
 property_tools = FastMCP("property")

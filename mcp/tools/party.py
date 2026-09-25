@@ -1,6 +1,6 @@
 """Party tools (the people and companies behind tenants, vendors, etc.)."""
 from fastmcp import FastMCP
-from db import query, build_where, cap_limit, contains, distinct_values
+from customer_service.db import query, build_where, cap_limit, contains, distinct_values
 
 party = FastMCP("party")
 
