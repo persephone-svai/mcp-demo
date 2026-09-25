@@ -8,6 +8,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-EXPOSE 9292
+EXPOSE 9293
 
-CMD ["python","cs_mcp.py"]
+CMD ["python","hr_mcp.py"]
